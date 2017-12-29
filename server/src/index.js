@@ -6,7 +6,6 @@ import logger from 'morgan';
 import bodyParser from 'body-parser';
 import { createServer } from 'http';
 import { execute, subscribe } from 'graphql';
-// import { PubSub } from 'graphql-subscriptions';
 import { SubscriptionServer } from 'subscriptions-transport-ws';
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
 import { makeExecutableSchema } from 'graphql-tools';
@@ -68,4 +67,5 @@ server.listen(port, () => {
       path: '/subscriptions',
     },
   );
+  console.log(`Server with websockets listening on ${port}`);
 });

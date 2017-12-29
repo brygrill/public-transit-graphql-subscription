@@ -1,74 +1,52 @@
-// pull from here: https://www.apollographql.com/docs/graphql-tools/generate-schema.html
+import { find } from 'lodash';
+import pubsub from '../subscriptions';
 
-import { find, filter } from 'lodash';
-import { pubsub } from '../subscriptions';
+import { fetchRedRose, pingRedRose } from '../loaders/load-red-rose';
 
-// example data
-import { count, mock } from '../subscriptions/mock';
-
-const authors = [
-  { id: 1, firstName: 'Tom', lastName: 'Coleman' },
-  { id: 2, firstName: 'Sashko', lastName: 'Stubailo' },
-  { id: 3, firstName: 'Mikhail', lastName: 'Novikov' },
-];
-const posts = [
-  {
-    id: 1,
-    authorId: 1,
-    title: 'Introduction to GraphQL',
-    votes: 2,
-  },
-  {
-    id: 2,
-    authorId: 2,
-    title: 'Welcome to Meteor',
-    votes: 3,
-  },
-  {
-    id: 3,
-    authorId: 2,
-    title: 'Advanced GraphQL',
-    votes: 1,
-  },
-  {
-    id: 4,
-    authorId: 3,
-    title: 'Launchpad is Cool',
-    votes: 7,
-  },
+const vehicles = [
+  { id: 1, lat: -40.5, lon: 76.0 },
+  { id: 2, lat: -40.6, lon: 76.1 },
+  { id: 3, lat: -40.7, lon: 76.2 },
 ];
 
 const resolvers = {
-  Query: {
-    posts: () => posts,
-    author: (_, { id }) => find(authors, { id }),
-    votersOnline() {
-      return { count };
+  Vehicle: {
+    id(item) {
+      return item.VehicleId;
+    },
+    lat(item) {
+      return item.Latitude;
+    },
+    lon(item) {
+      return item.Longitude;
     },
   },
-  Mutation: {
-    upvotePost: (_, { postId }) => {
-      const post = find(posts, { id: postId });
-      if (!post) {
-        throw new Error(`Couldn't find post with id ${postId}`);
+  Query: {
+    single_vehicle: (_, { id }) => find(vehicles, { id }),
+    async all_vehicles(_, args) {
+      if (!args.authority) {
+        throw new Error('Must include transit authority to query!');
       }
-      post.votes += 1;
-      return post;
+      try {
+        const data = await fetchRedRose();
+        return data;
+      } catch (error) {
+        throw new Error('Error fetching transit data');
+      }
     },
   },
   Subscription: {
-    votersOnline: {
+    single_vehicle: {
       subscribe() {
-        mock();
-        return pubsub.asyncIterator('votersOnline');
+        return pubsub.asyncIterator('single_vehicle');
       },
     },
-  },
-  Author: {
-    posts: author => filter(posts, { authorId: author.id }),
-  },
-  Post: {
-    author: post => find(authors, { id: post.authorId }),
+    all_vehicles: {
+      subscribe() {
+        pingRedRose();
+        return pubsub.asyncIterator('all_vehicles');
+      },
+    },
   },
 };
 
