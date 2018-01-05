@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import gql from 'graphql-tag';
 import { graphql } from 'react-apollo';
-import { Header } from 'semantic-ui-react';
+import Map from '../components/Map';
 
 const propTypes = {
   votersOnline: PropTypes.object,
@@ -19,7 +19,11 @@ class AppSubscription extends Component {
 
   render() {
     return (
-      <Header inverted>Voters Online: {this.props.votersOnline.count} </Header>
+      <Map
+        loading={this.props.loading}
+        error={this.props.error}
+        data={this.props.red_rose_sub}
+      />
     );
   }
 }
@@ -27,18 +31,25 @@ class AppSubscription extends Component {
 AppSubscription.propTypes = propTypes;
 AppSubscription.defaultProps = defaultProps;
 
-const ONLINE_QUERY = gql`
-  subscription VotersOnline {
-    votersOnline {
-      count
+const SUB_QUERY = gql`
+  subscription live {
+    red_rose_sub {
+      id
+      geojson {
+        type
+        geometry {
+          type
+          coordinates
+        }
+      }
     }
   }
 `;
 
-export default graphql(ONLINE_QUERY, {
-  props: ({ data: { loading, error, votersOnline } }) => ({
+export default graphql(SUB_QUERY, {
+  props: ({ data: { loading, error, red_rose_sub } }) => ({
     loading,
     error,
-    votersOnline,
+    red_rose_sub,
   }),
 })(AppSubscription);
