@@ -1,15 +1,34 @@
-type Vehicle {
+# GeoJSON Type
+scalar Coordinates
+
+type PointGeometry {
+  type: String!
+  coordinates: Coordinates!
+}
+
+type PointObject {
+  type: String!
+  geometry: PointGeometry!
+}
+
+# Red Rose Types
+type RedRoseBus {
   id: Int!
   lat: Float
   lon: Float
+  geojson: PointObject
 }
 
+type RedRoseTransit {
+  single_bus(id: Int!): RedRoseBus
+  all_buses: [RedRoseBus]
+}
+
+# Root
 type Query {
-  single_vehicle(id: Int!): Vehicle
-  all_vehicles(authority: String!): [Vehicle]
+  red_rose_transit: RedRoseTransit
 }
 
 type Subscription {
-  single_vehicle(id: Int!): Vehicle
-  all_vehicles: [Vehicle]
+  red_rose_sub: [RedRoseBus]
 }

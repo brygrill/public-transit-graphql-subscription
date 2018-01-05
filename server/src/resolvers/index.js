@@ -1,16 +1,46 @@
-import { find } from 'lodash';
+import { GraphQLScalarType } from 'graphql';
+import { find, has } from 'lodash';
 import pubsub from '../subscriptions';
 
 import { fetchRedRose, pingRedRose } from '../loaders/load-red-rose';
 
-const vehicles = [
-  { id: 1, lat: -40.5, lon: 76.0 },
-  { id: 2, lat: -40.6, lon: 76.1 },
-  { id: 3, lat: -40.7, lon: 76.2 },
-];
-
 const resolvers = {
-  Vehicle: {
+  Coordinates: new GraphQLScalarType({
+    // https://github.com/ghengeveld/graphql-geojson/blob/master/index.js#L46
+    // https://github.com/apollographql/graphql-tools/blob/master/docs/source/scalars.md
+    name: 'Coordinates',
+    description: 'A set of coordinates. x, y',
+    parseValue(value) {
+      return value;
+    },
+    serialize(value) {
+      return value;
+    },
+    parseLiteral(ast) {
+      return ast.value;
+    },
+  }),
+  PointGeometry: {
+    type() {
+      return 'Point';
+    },
+    coordinates(item) {
+      if (!has(item, 'lon_key') || !has(item, 'lat_key')) {
+        console.error('Must include lat and lon prop keys!');
+        return [];
+      }
+      return [item.data[item.lon_key], item.data[item.lat_key]];
+    },
+  },
+  PointObject: {
+    type() {
+      return 'Feature';
+    },
+    geometry(item) {
+      return item;
+    },
+  },
+  RedRoseBus: {
     id(item) {
       return item.VehicleId;
     },
@@ -20,13 +50,23 @@ const resolvers = {
     lon(item) {
       return item.Longitude;
     },
+    geojson(data) {
+      return { data, lon_key: 'Longitude', lat_key: 'Latitude' };
+    },
   },
-  Query: {
-    single_vehicle: (_, { id }) => find(vehicles, { id }),
-    async all_vehicles(_, args) {
-      if (!args.authority) {
-        throw new Error('Must include transit authority to query!');
+  RedRoseTransit: {
+    async single_bus(_, { id }) {
+      if (!id) {
+        throw new Error('Must include bus ID!');
       }
+      try {
+        const data = await fetchRedRose();
+        return find(data, { VehicleId: id });
+      } catch (error) {
+        throw new Error('Error fetching transit data');
+      }
+    },
+    async all_buses() {
       try {
         const data = await fetchRedRose();
         return data;
@@ -35,16 +75,16 @@ const resolvers = {
       }
     },
   },
-  Subscription: {
-    single_vehicle: {
-      subscribe() {
-        return pubsub.asyncIterator('single_vehicle');
-      },
+  Query: {
+    red_rose_transit(_, args, ctx) {
+      return { _, args, ctx };
     },
-    all_vehicles: {
+  },
+  Subscription: {
+    red_rose_sub: {
       subscribe() {
         pingRedRose();
-        return pubsub.asyncIterator('all_vehicles');
+        return pubsub.asyncIterator('red_rose_sub');
       },
     },
   },

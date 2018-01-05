@@ -18,7 +18,6 @@ export const fetchRedRose = () => {
 export const pingRedRose = async () => {
   setInterval(async () => {
     const data = await fetchRedRose();
-    console.log(data);
-    pubsub.publish('all_vehicles', { all_vehicles: data });
+    pubsub.publish('red_rose_sub', { red_rose_sub: data });
   }, 10000);
 };
