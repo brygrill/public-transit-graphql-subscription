@@ -17,10 +17,36 @@ export default class Map extends Component {
     this.initMap();
   }
 
-  initMap = () => {
-    const map = initMap(this.state.loc, this.mapContainer);
+  initMap = async () => {
+    // load map
+    const map = await initMap(this.state.loc, this.mapContainer);
+
     this.setState({ map });
-  }
+
+    map.on('load', () => {
+      // add empty layer
+      map.addSource('mylocation', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: this.state.loc,
+          },
+          properties: {},
+        },
+      });
+      map.addLayer({
+        id: 'mylocation',
+        type: 'circle',
+        source: 'mylocation',
+        paint: {
+          'circle-color': '#674172',
+          'circle-radius': 8,
+        },
+      });
+    });
+  };
 
   render() {
     console.log(this.props);
