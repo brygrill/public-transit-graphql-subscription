@@ -6,22 +6,27 @@ type PointGeometry {
   coordinates: Coordinates!
 }
 
-type PointObject {
+type RedRoseProps {
+  id: Int!
+  lat: Float
+  lon: Float
+}
+
+type RedRosePointObject {
   type: String!
-  geometry: PointGeometry!
+  geometry: PointGeometry
+  properties: RedRoseProps
 }
 
 # Red Rose Types
 type RedRoseBus {
-  id: Int!
-  lat: Float
-  lon: Float
-  geojson: PointObject
+  type: String!
+  features: [RedRosePointObject]
 }
 
 type RedRoseTransit {
   single_bus(id: Int!): RedRoseBus
-  all_buses: [RedRoseBus]
+  all_buses: RedRoseBus
 }
 
 # Root
@@ -30,5 +35,5 @@ type Query {
 }
 
 type Subscription {
-  red_rose_sub: [RedRoseBus]
+  red_rose_sub: RedRoseBus
 }

@@ -3,7 +3,9 @@ import { WebSocketLink } from 'apollo-link-ws';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 
-const subClient = new SubscriptionClient('ws://localhost:3001/subscriptions', {
+const devURL = 'ws://localhost:3001/subscriptions';
+const url = 'wss://ptfeed-graphql.now.sh/subscriptions';
+const subClient = new SubscriptionClient(url, {
   reconnect: true,
 });
 

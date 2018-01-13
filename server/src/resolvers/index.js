@@ -1,5 +1,5 @@
 import { GraphQLScalarType } from 'graphql';
-import { find, has } from 'lodash';
+import { find, has, assign } from 'lodash';
 import pubsub from '../subscriptions';
 
 import { fetchRedRose, pingRedRose } from '../loaders/load-red-rose';
@@ -25,22 +25,14 @@ const resolvers = {
       return 'Point';
     },
     coordinates(item) {
-      if (!has(item, 'lon_key') || !has(item, 'lat_key')) {
+      if (!has(item, '_latKey') || !has(item, '_lonKey')) {
         console.error('Must include lat and lon prop keys!');
         return [];
       }
-      return [item.data[item.lon_key], item.data[item.lat_key]];
+      return [item[item._lonKey], item[item._latKey]];
     },
   },
-  PointObject: {
-    type() {
-      return 'Feature';
-    },
-    geometry(item) {
-      return item;
-    },
-  },
-  RedRoseBus: {
+  RedRoseProps: {
     id(item) {
       return item.VehicleId;
     },
@@ -50,8 +42,33 @@ const resolvers = {
     lon(item) {
       return item.Longitude;
     },
-    geojson(data) {
-      return { data, lon_key: 'Longitude', lat_key: 'Latitude' };
+  },
+  RedRosePointObject: {
+    type() {
+      return 'Feature';
+    },
+    geometry(item) {
+      return item;
+    },
+    properties(item) {
+      return item;
+    },
+  },
+  RedRoseBus: {
+    type() {
+      return 'FeatureCollection';
+    },
+    features(data) {
+      // add object keys for lat and lon
+      // for PointGeometry type to access
+      const withKey = data.map(item => {
+        return assign(item, {
+          _latKey: 'Latitude',
+          _lonKey: 'Longitude',
+        });
+      });
+
+      return withKey;
     },
   },
   RedRoseTransit: {

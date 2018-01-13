@@ -34,6 +34,9 @@ app.use(cors({ origin: true }));
 if (process.env.NODE_ENV !== 'production') {
   app.use(logger('dev'));
 }
+app.get('/health', (req, res) => {
+  res.json({ up: true });
+});
 
 app.use(
   '/graphql',

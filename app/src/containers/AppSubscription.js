@@ -34,12 +34,15 @@ AppSubscription.defaultProps = defaultProps;
 const SUB_QUERY = gql`
   subscription live {
     red_rose_sub {
-      id
-      geojson {
+      type
+      features {
         type
         geometry {
           type
           coordinates
+        }
+        properties {
+          id
         }
       }
     }
