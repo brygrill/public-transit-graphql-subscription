@@ -55,6 +55,7 @@
     "build": "webpack --progress --profile --colors",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:snap": "jest -- -u"
+    "test:snap": "jest -- -u",
+    "deploy": "yarn build && now deploy -n ptfeed-graphql --docker"
   }
 }
