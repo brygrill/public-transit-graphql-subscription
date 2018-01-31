@@ -14,6 +14,10 @@ import schema from './schema/schema.gql';
 import resolvers from './resolvers';
 
 const port = process.env.PORT || 3001;
+const wsURL =
+  process.env.NODE_ENV === 'production'
+    ? 'wss://ptfeed-graphql.now.sh/subscriptions'
+    : `ws://localhost:${port}/subscriptions`;
 
 // Put together a schema
 const myGraphQLSchema = makeExecutableSchema({
@@ -34,6 +38,7 @@ app.use(cors({ origin: true }));
 if (process.env.NODE_ENV !== 'production') {
   app.use(logger('dev'));
 }
+
 app.get('/health', (req, res) => {
   res.json({ up: true });
 });
@@ -51,7 +56,7 @@ app.use(
   '/graphiql',
   graphiqlExpress({
     endpointURL: '/graphql',
-    subscriptionsEndpoint: `ws://localhost:${port}/subscriptions`,
+    subscriptionsEndpoint: wsURL,
   }),
 );
 
