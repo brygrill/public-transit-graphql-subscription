@@ -9,7 +9,7 @@ const initMap = (center, container) => {
         container,
         style: 'mapbox://styles/mapbox/streets-v9',
         center,
-        zoom: 10,
+        zoom: 11,
       });
 
       // Add Controls

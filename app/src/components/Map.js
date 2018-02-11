@@ -7,13 +7,12 @@ import initMap from '../config';
 
 export default class MapComponent extends Component {
   state = {
-    loading: true,
-    error: false,
-    loc: [-76.2, 40],
+    loc: [-76.305, 40.037],
     map: null,
     layers: {
       redrose: { name: 'redrose' },
     },
+    error: false,
   };
 
   componentDidMount() {
@@ -30,14 +29,7 @@ export default class MapComponent extends Component {
       // add empty layer
       map.addSource(this.state.layers.redrose.name, {
         type: 'geojson',
-        data: {
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: this.state.loc,
-          },
-          properties: {},
-        },
+        data: this.props.data,
       });
       map.addLayer({
         id: this.state.layers.redrose.name,
@@ -45,22 +37,28 @@ export default class MapComponent extends Component {
         source: this.state.layers.redrose.name,
         paint: {
           'circle-color': '#674172',
-          'circle-radius': 8,
+          'circle-radius': 6,
         },
       });
     });
   };
 
   componentWillReceiveProps(nextProps) {
-    this.state.map
-      .getSource(this.state.layers.redrose.name)
-      .setData(nextProps.data);
+    if (this.props !== nextProps) {
+      try {
+        this.state.map
+          .getSource(this.state.layers.redrose.name)
+          .setData(nextProps.data);
+      } catch (error) {
+        this.setState({ error });
+      }
+    }
   }
 
   render() {
     return (
       <div>
-        {/* <Loading show={this.props.loading} /> */}
+        <Loading show={this.props.loading} />
         <div
           ref={el => (this.mapContainer = el)} // eslint-disable-line no-return-assign
           className="absolute top right left bottom"
