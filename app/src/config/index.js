@@ -7,9 +7,9 @@ const initMap = (center, container) => {
     try {
       const map = new mapboxgl.Map({
         container,
-        style: 'mapbox://styles/mapbox/outdoors-v9',
+        style: 'mapbox://styles/mapbox/streets-v9',
         center,
-        zoom: 12.5,
+        zoom: 10,
       });
 
       // Add Controls

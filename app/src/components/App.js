@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import ErrorBoundary from './ErrorBoundary';
-import AppSubscription from '../containers/AppSubscription';
+import AppSubscription from '../containers/FeedSubscription';
 
 // const Fragment = React.Fragment;
 

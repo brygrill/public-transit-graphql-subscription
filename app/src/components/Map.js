@@ -5,12 +5,15 @@ import Loading from './Loading';
 
 import initMap from '../config';
 
-export default class Map extends Component {
+export default class MapComponent extends Component {
   state = {
     loading: true,
     error: false,
-    loc: [-76, 40],
+    loc: [-76.2, 40],
     map: null,
+    layers: {
+      redrose: { name: 'redrose' },
+    },
   };
 
   componentDidMount() {
@@ -25,7 +28,7 @@ export default class Map extends Component {
 
     map.on('load', () => {
       // add empty layer
-      map.addSource('mylocation', {
+      map.addSource(this.state.layers.redrose.name, {
         type: 'geojson',
         data: {
           type: 'Feature',
@@ -37,9 +40,9 @@ export default class Map extends Component {
         },
       });
       map.addLayer({
-        id: 'mylocation',
+        id: this.state.layers.redrose.name,
         type: 'circle',
-        source: 'mylocation',
+        source: this.state.layers.redrose.name,
         paint: {
           'circle-color': '#674172',
           'circle-radius': 8,
@@ -48,13 +51,37 @@ export default class Map extends Component {
     });
   };
 
+  componentWillReceiveProps(nextProps) {
+    this.state.map
+      .getSource(this.state.layers.redrose.name)
+      .setData(nextProps.data);
+  }
+
   render() {
-    console.log(this.props);
     return (
-      <div
-        ref={el => (this.mapContainer = el)} // eslint-disable-line no-return-assign
-        className="absolute top right left bottom"
-      />
+      <div>
+        {/* <Loading show={this.props.loading} /> */}
+        <div
+          ref={el => (this.mapContainer = el)} // eslint-disable-line no-return-assign
+          className="absolute top right left bottom"
+        />
+      </div>
     );
   }
 }
+
+MapComponent.propTypes = {
+  loading: PropTypes.bool.isRequired,
+  data: PropTypes.object,
+};
+
+MapComponent.defaultProps = {
+  data: {
+    type: 'Feature',
+    geometry: {
+      type: 'Point',
+      coordinates: [0, 0],
+    },
+    properties: {},
+  },
+};
