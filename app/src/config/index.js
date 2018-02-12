@@ -24,6 +24,26 @@ const initMap = (center, container) => {
         }),
       );
 
+      // add test layer
+
+
+      map.on('click', 'test', e => {
+        new mapboxgl.Popup()
+          .setLngLat(e.features[0].geometry.coordinates)
+          .setHTML(e.features[0].properties.id)
+          .addTo(map);
+      });
+
+      // Change the cursor to a pointer when the mouse is over the places layer.
+      map.on('mouseenter', 'test', () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+
+      // Change it back to a pointer when it leaves.
+      map.on('mouseleave', 'test', () => {
+        map.getCanvas().style.cursor = '';
+      });
+
       resolve(map);
     } catch (error) {
       reject(error);

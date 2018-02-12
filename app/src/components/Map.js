@@ -11,6 +11,7 @@ export default class MapComponent extends Component {
     map: null,
     layers: {
       redrose: { name: 'redrose' },
+      test: { name: 'test' },
     },
     error: false,
   };
@@ -26,7 +27,30 @@ export default class MapComponent extends Component {
     this.setState({ map });
 
     map.on('load', () => {
-      // add empty layer
+      map.addSource('test', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [-76.305, 40.037],
+          },
+          properties: {
+            id: '1234',
+          },
+        },
+      });
+      map.addLayer({
+        id: 'test',
+        type: 'circle',
+        source: 'test',
+        paint: {
+          'circle-color': '#446CB3',
+          'circle-radius': 6,
+        },
+      });
+
+      // add layers
       map.addSource(this.state.layers.redrose.name, {
         type: 'geojson',
         data: this.props.data,
